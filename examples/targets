@@ -1,0 +1,4 @@
+transceiver ~/repos/td1023-transceiver/scripts/deployment_target
+rest-api ~/repos/td1023-rest/scripts/target
+frontend ~/repos/td1023-frontend-react/scripts/target
+frontend ~/repos/td1023-frontend-react/.env VITE_PROXY_TARGET

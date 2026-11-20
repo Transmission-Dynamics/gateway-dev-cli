@@ -1,0 +1,34 @@
+#!/usr/bin/env zsh
+
+emulate -R zsh
+setopt no_unset pipe_fail
+
+TESTS_DIR=${0:A:h}
+GW_REPO=${TESTS_DIR:h}
+
+source "$TESTS_DIR/helpers.zsh"
+for test_file in "$TESTS_DIR"/*_test.zsh; do
+  source "$test_file"
+done
+
+filter=${1:-}
+passed=0
+failed_tests=()
+for test_name in ${(ok)functions[(I)test_*]}; do
+  [[ -z $filter || $test_name == *$filter* ]] || continue
+  if output=$(run_test "$test_name" 2>&1); then
+    passed=$(( passed + 1 ))
+    print -r -- "✓ $test_name"
+  else
+    failed_tests+=("$test_name")
+    print -r -- "✗ $test_name"
+    print -r -- "$output" | sed 's/^/    /'
+  fi
+done
+
+print
+if (( ${#failed_tests} > 0 )); then
+  print -r -- "$passed passed, ${#failed_tests} failed: ${failed_tests[*]}"
+  exit 1
+fi
+print -r -- "$passed passed"

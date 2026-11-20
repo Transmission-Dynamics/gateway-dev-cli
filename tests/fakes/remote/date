@@ -1,0 +1,11 @@
+#!/bin/sh
+if [ "$1" = -u ] && [ "$2" = +%s ] && [ -n "${GW_TEST_NOW:-}" ]; then
+  echo "$GW_TEST_NOW"
+elif [ "$1" = -u ] && [ "$2" = -d ]; then
+  case $3 in
+    @*) /bin/date -u -r "${3#@}" "$4" ;;
+    *) /bin/date -j -u -f '%Y-%m-%d %H:%M:%S' "${3% UTC}" "$4" ;;
+  esac
+else
+  exec /bin/date "$@"
+fi

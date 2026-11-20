@@ -1,0 +1,32 @@
+#!/bin/sh
+units_dir=$GW_TEST_DIR/units
+action=$1
+shift
+case $action in
+  show)
+    [ "$1" = -p ] && shift 2
+    for unit in "$@"; do
+      echo "Id=$unit"
+      if [ -f "$units_dir/$unit" ]; then
+        cat "$units_dir/$unit"
+      else
+        echo 'LoadState=not-found'
+        echo 'ActiveState=inactive'
+        echo 'SubState=dead'
+      fi
+      echo
+    done
+    ;;
+  list-unit-files)
+    for unit in "$units_dir"/td-*.service; do
+      [ -f "$unit" ] && echo "$(basename "$unit") enabled"
+    done
+    ;;
+  cat)
+    [ -f "$units_dir/$1" ]
+    ;;
+  restart)
+    echo "$1" >> "$GW_TEST_DIR/restarts.log"
+    [ ! -f "$units_dir/$1.refuses-restart" ]
+    ;;
+esac

@@ -1,0 +1,7 @@
+#!/bin/sh
+for mount; do :; done
+echo 'Filesystem 1024-blocks Used Available Capacity Mounted on'
+case $mount in
+  /) echo "/dev/root 5000000 ${GW_TEST_ROOT_USED_KB:-1600000} 3400000 32% /" ;;
+  *) echo "/dev/mmcblk1p1 30000000 ${GW_TEST_SD_USED_KB:-900000} 29100000 3% $mount" ;;
+esac

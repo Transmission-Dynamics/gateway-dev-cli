@@ -1,0 +1,20 @@
+#!/bin/sh
+service=$(cat .service-name 2>/dev/null || basename "$PWD")
+target=$(cat scripts/target 2>/dev/null)
+printf '%s\t%s\t%s\t%s\n' "$service" "$*" "$target" "$PWD" >> "$GW_TEST_DIR/npm.log"
+echo "> fake npm $* for $service"
+
+if [ -f "$GW_TEST_DIR/npm-pause" ]; then
+  trap 'touch "$GW_TEST_DIR/npm-stopped"' EXIT
+  trap 'exit 130' INT TERM
+  touch "$GW_TEST_DIR/npm-paused"
+  while [ -f "$GW_TEST_DIR/npm-pause" ]; do sleep 0.1; done
+fi
+if [ -f "$GW_TEST_DIR/npm-fails-$service" ]; then
+  echo "npm ERR! build of $service failed"
+  exit 1
+fi
+if [ "$*" = 'run deploy' ]; then
+  mkdir -p "$GW_TEST_DIR/jrd/$service"
+  git rev-parse HEAD > "$GW_TEST_DIR/jrd/$service/version"
+fi

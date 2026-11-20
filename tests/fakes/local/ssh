@@ -1,0 +1,28 @@
+#!/bin/sh
+while [ $# -gt 0 ]; do
+  case $1 in
+    -o) echo "$2" >> "$GW_TEST_DIR/ssh-options.log"; shift 2 ;;
+    -*) shift ;;
+    *) break ;;
+  esac
+done
+address=$1
+shift
+printf '%s\t%s\n' "$address" "$*" >> "$GW_TEST_DIR/ssh.log"
+
+case $address in
+  *unreachable*)
+    echo "ssh: connect to host $address port 22: Operation timed out" >&2
+    exit 255
+    ;;
+  *nokey*)
+    echo "$address: Permission denied (publickey)." >&2
+    exit 255
+    ;;
+esac
+case "$*" in
+  '') echo "interactive shell on $address"; exit 0 ;;
+  /usr/jrd/scripts/show_logs.sh*) echo "log stream from $address"; exit 0 ;;
+esac
+
+PATH="$GW_TEST_FAKES/remote:$PATH" GW_APPS_DIR="$GW_TEST_DIR/jrd" GW_TABLES_DIR="$GW_TEST_DIR/tables" GW_PROC_DIR="$GW_TEST_DIR/proc" sh -c "$*"

@@ -1,0 +1,16 @@
+#!/usr/bin/env zsh
+
+emulate -R zsh
+setopt no_unset pipe_fail no_bg_nice
+
+GW_ROOT=${0:A:h:h}
+
+for gw_module in ui runtime cli completion config gateway activity status targets install; do
+  source "$GW_ROOT/lib/$gw_module.zsh"
+done
+for gw_module in "$GW_ROOT"/lib/commands/*.zsh; do
+  source "$gw_module"
+done
+unset gw_module
+
+gw_main "$@"
