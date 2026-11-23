@@ -12,7 +12,7 @@ gw_command status \
   example 'gw status alpha --watch' \
   example 'gw status transceiver rest-api'
 
-GW_STATUS_WATCH_SECONDS=${GW_STATUS_WATCH_SECONDS:-5}
+GW_STATUS_WATCH_SECONDS=5
 
 typeset -ga status_options=()
 

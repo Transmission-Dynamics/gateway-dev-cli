@@ -306,21 +306,7 @@ test_status_watch_refreshes_until_stopped() {
   given_alias alpha td@alpha.local
   given_remote_service rest-api 7bcc4305
   given_remote_unit rest-api
-  GW_STATUS_WATCH_SECONDS=1 "$GW_BIN" status alpha --watch > "$GW_TEST_DIR/stdout" 2> "$GW_TEST_DIR/stderr" < /dev/null &
-  local gw_pid=$! waited=0
-  while (( $(grep -c '^SERVICE' "$GW_TEST_DIR/stdout" 2> /dev/null || true) < 2 && waited < 150 )); do
-    sleep 0.1
-    waited=$(( waited + 1 ))
-  done
-  kill -TERM $gw_pid
-  gw_exit=0
-  wait $gw_pid || gw_exit=$?
-  gw_stdout=$(< "$GW_TEST_DIR/stdout")
-  gw_stderr=$(< "$GW_TEST_DIR/stderr")
-  gw_output=$gw_stdout$'\n'$gw_stderr
-  assert_exit 0
-  (( $(grep -c '^SERVICE' "$GW_TEST_DIR/stdout") >= 2 )) || fail 'expected at least two refreshes'
-  assert_contains "$gw_stderr" 'Refreshing every 1s, Ctrl+C to stop'
+  run_gw_watch '^SERVICE' status alpha
 }
 
 test_ssh_connections_are_shared_between_calls() {

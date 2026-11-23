@@ -58,7 +58,6 @@ test_deploy_record_goes_stale_after_a_deploy_without_gw() {
   given_deploy_setup
   run_gw deploy alpha rest-api
   assert_contains "$gw_stdout" 'Test User'
-  sleep 1
   print -r -- 'ffffffffffffffff' > "$GW_TEST_DIR/jrd/rest-api/version"
   run_gw status alpha rest-api
   assert_contains "$gw_stdout" 'rest-api  ffffffff'

@@ -142,18 +142,20 @@ gw_require_reachable() {
 }
 
 gw_watch() {
-  local seconds=$1 fetch=$2 show=$3
+  local seconds=${GW_WATCH_SECONDS:-$1} fetch=$2 show=$3 frame end_of_line=$'\e[K\n'
   TRAPINT() { gw_stop_watching }
   TRAPTERM() { gw_stop_watching }
+  [[ ! -t 1 ]] || print -n -- $'\e[H\e[2J'
   while true; do
-    if "$fetch"; then
-      if [[ -t 1 ]]; then
-        print -n -- $'\e[H\e[2J'
-        gw_announce_gateway
+    if [[ -t 1 ]]; then
+      if "$fetch"; then
+        frame=$({ gw_announce_gateway; "$show"; gw_note "Refreshing every ${seconds}s, Ctrl+C to stop"; } 2>&1) || true
+        print -n -r -- $'\e[H'"${frame//$'\n'/$end_of_line}"$'\e[K\n\e[J'
       fi
-      "$show"
+    else
+      "$fetch" && "$show"
+      gw_note "Refreshing every ${seconds}s, Ctrl+C to stop"
     fi
-    gw_note "Refreshing every ${seconds}s, Ctrl+C to stop"
     sleep "$seconds" || true
   done
 }

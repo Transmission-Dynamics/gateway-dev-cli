@@ -61,6 +61,6 @@ Plain text files in `~/.config/gw/`, editable by hand:
 | `repos` | `<service> <repo path>` |
 | `targets` | `<name> <path> [ENV_VAR]` |
 
-Set `NO_COLOR=1` to turn colours and emojis off, or `GW_EMOJI=never` for emojis only. Exit codes: `0` ok, `1` failed, `2` wrong usage, `130` interrupted.
+Set `NO_COLOR=1` to turn colours and emojis off, or `GW_EMOJI=never` for emojis only. `GW_WATCH_SECONDS=2` changes how often `--watch` refreshes. Exit codes: `0` ok, `1` failed, `2` wrong usage, `130` interrupted.
 
 🤝 Working on gw: see [AGENTS.md](AGENTS.md).

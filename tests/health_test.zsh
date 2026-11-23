@@ -29,21 +29,18 @@ test_health_rejects_extra_arguments() {
 test_health_watch_refreshes_until_stopped() {
   given_alias alpha td@alpha.local
   given_gateway_health
-  GW_HEALTH_WATCH_SECONDS=1 "$GW_BIN" health alpha --watch > "$GW_TEST_DIR/stdout" 2> "$GW_TEST_DIR/stderr" < /dev/null &
-  local gw_pid=$! waited=0
-  while (( $(grep -c '^Resources ' "$GW_TEST_DIR/stdout" 2> /dev/null || true) < 2 && waited < 150 )); do
-    sleep 0.1
-    waited=$(( waited + 1 ))
-  done
-  kill -TERM $gw_pid
-  gw_exit=0
-  wait $gw_pid || gw_exit=$?
-  gw_stdout=$(< "$GW_TEST_DIR/stdout")
-  gw_stderr=$(< "$GW_TEST_DIR/stderr")
-  gw_output=$gw_stdout$'\n'$gw_stderr
-  assert_exit 0
-  (( $(grep -c '^Resources ' "$GW_TEST_DIR/stdout") >= 2 )) || fail 'expected at least two refreshes'
+  run_gw_watch '^Resources ' health alpha
   (( $(grep -c '^  SD card ' "$GW_TEST_DIR/stdout") == $(grep -c '^Resources ' "$GW_TEST_DIR/stdout") )) ||
     fail 'each refresh should show each disk once'
-  assert_contains "$gw_stderr" 'Refreshing every 1s, Ctrl+C to stop'
+}
+
+test_health_watch_redraws_in_place_on_a_terminal() {
+  given_alias alpha td@alpha.local
+  given_gateway_health
+  GW_WATCH_SECONDS=0.2 python3 "$TESTS_DIR/in_terminal.py" 1.5 "$GW_BIN" health alpha --watch
+  local screen=$(< "$GW_TEST_DIR/terminal")
+  (( ${#${(ps:\e[H:)screen}} >= 3 )) || fail 'expected at least two frames drawn from the top'
+  assert_contains "$screen" $'Resources  up'
+  assert_contains "$screen" $'free\e[K'
+  assert_lacks "$screen" "\$'"
 }

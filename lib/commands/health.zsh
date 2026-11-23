@@ -6,7 +6,7 @@ gw_command health \
   example 'gw health alpha' \
   example 'gw health alpha --watch'
 
-GW_HEALTH_WATCH_SECONDS=${GW_HEALTH_WATCH_SECONDS:-5}
+GW_HEALTH_WATCH_SECONDS=5
 GW_HEALTH_BAR_WIDTH=10
 GW_HEALTH_LOAD_HIGH_PERCENT=70
 GW_HEALTH_LOAD_CRITICAL_PERCENT=100

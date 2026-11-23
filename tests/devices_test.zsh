@@ -113,21 +113,7 @@ test_devices_unreachable_gateway_gives_a_clear_error() {
 
 test_devices_watch_refreshes_until_stopped() {
   given_devices_gateway
-  "$GW_BIN" devices alpha --watch > "$GW_TEST_DIR/stdout" 2> "$GW_TEST_DIR/stderr" < /dev/null &
-  local gw_pid=$! waited=0
-  while (( $(grep -c 'devices seen' "$GW_TEST_DIR/stdout" 2> /dev/null || true) < 2 && waited < 100 )); do
-    sleep 0.1
-    waited=$(( waited + 1 ))
-  done
-  kill -TERM $gw_pid
-  gw_exit=0
-  wait $gw_pid || gw_exit=$?
-  gw_stdout=$(< "$GW_TEST_DIR/stdout")
-  gw_stderr=$(< "$GW_TEST_DIR/stderr")
-  gw_output=$gw_stdout$'\n'$gw_stderr
-  assert_exit 0
-  (( $(grep -c 'devices seen' "$GW_TEST_DIR/stdout") >= 2 )) || fail 'expected at least two refreshes'
-  assert_contains "$gw_stderr" 'Refreshing every 3s, Ctrl+C to stop'
+  run_gw_watch 'devices seen' devices alpha
 }
 
 test_devices_completion_and_help() {

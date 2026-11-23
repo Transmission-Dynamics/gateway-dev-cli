@@ -43,6 +43,26 @@ run_gw() {
   gw_output=$gw_stdout$'\n'$gw_stderr
 }
 
+run_gw_watch() {
+  local marker=$1 gw_pid waited=0
+  shift
+  GW_WATCH_SECONDS=0.2 "$GW_BIN" "$@" --watch > "$GW_TEST_DIR/stdout" 2> "$GW_TEST_DIR/stderr" < /dev/null &
+  gw_pid=$!
+  while (( $(grep -c "$marker" "$GW_TEST_DIR/stdout" 2> /dev/null || true) < 2 && waited < 100 )); do
+    sleep 0.1
+    waited=$(( waited + 1 ))
+  done
+  kill -TERM $gw_pid
+  gw_exit=0
+  wait $gw_pid || gw_exit=$?
+  gw_stdout=$(< "$GW_TEST_DIR/stdout")
+  gw_stderr=$(< "$GW_TEST_DIR/stderr")
+  gw_output=$gw_stdout$'\n'$gw_stderr
+  assert_exit 0
+  (( $(grep -c "$marker" "$GW_TEST_DIR/stdout") >= 2 )) || fail 'expected at least two refreshes'
+  assert_contains "$gw_stderr" 'Refreshing every 0.2s, Ctrl+C to stop'
+}
+
 fail() {
   print -r -- "$1"
   if [[ -n ${gw_output//$'\n'} ]]; then
