@@ -16,14 +16,6 @@ test_conventions_every_script_parses() {
   done
 }
 
-test_conventions_code_has_no_comments() {
-  local file found
-  for file in $(repo_zsh_files) $(repo_sh_files) "$GW_REPO"/examples/*; do
-    found=$(awk 'NR == 1 && /^#!/ { next } /^[[:space:]]*#/ { print FILENAME ":" NR ": " $0 }' "$file")
-    [[ -z $found ]] || fail "comment found, say it with names instead: ${found#$GW_REPO/}"
-  done
-}
-
 test_conventions_every_command_has_help_and_is_documented() {
   local command
   run_gw __complete
@@ -39,4 +31,22 @@ test_conventions_remote_scripts_only_use_the_apps_dir_variable() {
   local found
   found=$(grep -n '/usr/jrd' "$GW_REPO"/lib/remote/*.sh | grep -v 'GW_APPS_DIR:-/usr/jrd' || true)
   [[ -z $found ]] || fail "hard-coded /usr/jrd in a remote script: $found"
+}
+
+status_script_states() {
+  local script=$GW_REPO/lib/remote/status.sh
+  {
+    grep -oE "state ?= ?[\"'][^\"']+[\"']" "$script"
+    grep -oE '\? "[^"]+" : "[^"]+"' "$script" | tr ':' '\n'
+  } | grep -oE "[\"'][^\"']+[\"']" | tr -d "\"'" | sort -u
+}
+
+test_conventions_every_status_state_is_explained() {
+  local state
+  source "$GW_REPO/lib/status.zsh"
+  local -A explained=("${GW_STATES[@]}")
+  for state in ${(f)"$(status_script_states)"}; do
+    [[ $state == 'no unit' ]] && continue
+    (( ${+explained[$state]} )) || fail "state '$state' from lib/remote/status.sh has no entry in GW_STATES"
+  done
 }
