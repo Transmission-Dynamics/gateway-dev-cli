@@ -322,3 +322,20 @@ test_ssh_connections_are_shared_between_calls() {
   [[ -d $HOME/.cache/gw ]] || fail 'the ssh control folder was not created'
   [[ $(stat -f %Lp "$HOME/.cache/gw") == 700 ]] || fail 'the ssh control folder must be private'
 }
+
+test_logs_warns_when_a_service_wrote_nothing_the_journal_still_keeps() {
+  given_alias alpha td@alpha.local
+  given_remote_unit rest-api
+  given_remote_unit transceiver
+  mkdir -p "$GW_TEST_DIR/journal"
+  print -r -- 'ts=1 msg=hello' > "$GW_TEST_DIR/journal/td-transceiver.service"
+  print -r -- $(( GW_TEST_NOW - 5520 )) > "$GW_TEST_DIR/journal/oldest"
+  run_gw logs alpha rest-api transceiver
+  assert_exit 0
+  assert_contains "$gw_stderr" 'rest-api wrote nothing in the last 1h 32m, all the journal keeps'
+  assert_contains "$gw_stderr" 'Waiting for new lines; stop with Ctrl+C'
+  assert_lacks "$gw_stderr" 'transceiver wrote nothing'
+  assert_contains "$(ssh_log)" 'show_logs.sh'
+  run_gw logs alpha transceiver
+  assert_lacks "$gw_stderr" 'wrote nothing'
+}

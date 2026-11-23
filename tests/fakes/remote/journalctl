@@ -1,0 +1,13 @@
+#!/bin/sh
+journal_dir=$GW_TEST_DIR/journal
+unit=''
+while [ $# -gt 0 ]; do
+  [ "$1" = -u ] && unit=$2
+  shift
+done
+if [ -n "$unit" ]; then
+  [ -f "$journal_dir/$unit" ] && tail -n 1 "$journal_dir/$unit"
+else
+  [ -f "$journal_dir/oldest" ] && echo "$(cat "$journal_dir/oldest").123456 alpha node[1]: first line"
+fi
+true

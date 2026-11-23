@@ -36,9 +36,18 @@ cmd_logs() {
 }
 
 logs_check_services() {
-  local service missing=0
-  gw_remote "Checking services on $gw_gateway" units || exit 1
-  local -a known=("${(@f)gw_remote_output}")
+  local service line missing=0
+  local -a known=() quiet=() fields
+  local journal_age=''
+  gw_remote "Checking services on $gw_gateway" logs "$@" || exit 1
+  for line in "${(@f)gw_remote_output}"; do
+    fields=("${(@ps:\t:)line}")
+    case ${fields[1]} in
+      unit) known+=("${fields[2]}") ;;
+      quiet) quiet+=("${fields[2]}") ;;
+      journal_age) journal_age=${fields[2]} ;;
+    esac
+  done
   for service in "$@"; do
     (( ${known[(Ie)$service]} )) && continue
     missing=1
@@ -47,6 +56,19 @@ logs_check_services() {
     [[ -z $REPLY ]] || gw_hint 'Did you mean:' "gw logs${gw_gateway_word:+ $gw_gateway_word} $REPLY"
   done
   (( ! missing )) || exit 1
+  logs_warn_quiet "$journal_age" "${quiet[@]}"
+}
+
+logs_warn_quiet() {
+  local journal_age=$1 window='the journal'
+  shift
+  (( $# > 0 )) || return 0
+  if [[ $journal_age == <-> ]]; then
+    gw_duration_label "$journal_age"
+    window="the last $REPLY, all the journal keeps"
+  fi
+  gw_warn "${(j:, :)@} wrote nothing in $window"
+  gw_has_flag --no-follow || gw_hint 'Waiting for new lines; stop with' Ctrl+C
 }
 
 complete_logs() {
