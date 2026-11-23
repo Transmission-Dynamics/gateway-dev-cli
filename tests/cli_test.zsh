@@ -100,3 +100,14 @@ test_cli_messages_use_emojis_only_on_a_colour_terminal() {
   run_gw alias rm alpha
   assert_lacks "$gw_stderr" '✅'
 }
+
+test_cli_combined_short_flags_are_split() {
+  given_alias alpha td@alpha.local
+  given_repo rest-api
+  run_gw deploy alpha rest-api -nv
+  assert_exit 0
+  assert_contains "$gw_stderr" 'Dry run'
+  run_gw deploy alpha rest-api -nx
+  assert_exit 2
+  assert_contains "$gw_stderr" 'Unknown option for gw deploy: -x'
+}

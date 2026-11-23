@@ -108,6 +108,9 @@ gw_parse_arguments() {
         gw_command_help "$command"
         exit 0
         ;;
+      -[[:alpha:]][[:alpha:]]*)
+        set -- ${${(s::)argument[2,-1]}/#/-} "$@"
+        ;;
       --*=*)
         gw_take_flag "$command" "${argument%%=*}" "${argument#*=}" given
         ;;
