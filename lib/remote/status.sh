@@ -28,7 +28,7 @@ fi
 units=''
 for service in "$@"; do units="$units td-$service.service"; done
 states=$(
-  systemctl show -p Id,LoadState,ActiveState,SubState,Type,UnitFileState,ActiveEnterTimestamp $units |
+  systemctl show -p Id,LoadState,ActiveState,SubState,Result,Type,UnitFileState,ActiveEnterTimestamp $units |
     awk -F= '
       function emit() {
         if (id == "") return
@@ -36,6 +36,7 @@ states=$(
         a = p["ActiveState"]; s = p["SubState"]
         if (p["LoadState"] == "not-found") state = "no unit"
         else if (p["LoadState"] == "masked") state = "disabled"
+        else if (p["Result"] == "exec-condition" && a != "active") state = "off by config"
         else if (a == "active" || a == "reloading") state = (s == "exited") ? "done" : "running"
         else if (a == "activating") state = (s == "auto-restart") ? "crash loop" : "starting"
         else if (a == "deactivating") state = "stopping"

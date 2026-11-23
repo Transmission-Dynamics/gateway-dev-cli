@@ -1,10 +1,11 @@
-GW_STATUS_HIDDEN_STATES=('not a service' 'disabled')
+GW_STATUS_HIDDEN_STATES=('not a service' 'disabled' 'off by config')
 
 GW_STATES=(
   'running'        'a long-running service that is up'
   'done'           'a run-once job that ran and finished OK'
   'idle'           'a run-once job not running now (runs on boot, a timer or on demand)'
   'disabled'       'turned off on purpose, not started on boot'
+  'off by config'  'its start condition says no, for example it is turned off in td.env'
   'not a service'  'files are deployed, but no td-<name>.service unit runs them'
   'starting'       'being started'
   'stopping'       'being shut down'
@@ -23,7 +24,7 @@ gw_state_color() {
   case $1 in
     running|done) REPLY=${C[good]} ;;
     crashed|'crash loop'|'not installed') REPLY=${C[bad]} ;;
-    idle|disabled|'not a service') REPLY=${C[muted]} ;;
+    idle|disabled|'off by config'|'not a service') REPLY=${C[muted]} ;;
     *) REPLY=${C[caution]} ;;
   esac
 }

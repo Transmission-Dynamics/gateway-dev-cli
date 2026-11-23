@@ -11,7 +11,7 @@ test_status_lists_deployed_services_newest_first() {
   assert_equals 'SERVICE      COMMIT    DEPLOYED (UTC)    STATE       STARTED
 transceiver  96bd8788  2026-10-30 11:18  crash loop  -
 rest-api     7bcc4305  2026-10-29 12:59  running     20h 05m ago' "$gw_stdout"
-  assert_contains "$gw_stderr" '1 disabled or not a service, hidden. Show them with: gw status alpha --all'
+  assert_contains "$gw_stderr" '1 turned off or not a service, hidden. Show them with: gw status alpha --all'
 }
 
 test_status_all_and_named_services_show_hidden_ones() {
@@ -21,10 +21,16 @@ test_status_all_and_named_services_show_hidden_ones() {
   given_remote_unit gpio ActiveState=inactive SubState=dead UnitFileState=disabled
   run_gw status alpha
   assert_equals '' "$gw_stdout"
-  assert_contains "$gw_stderr" '2 disabled or not a service, hidden'
+  assert_contains "$gw_stderr" '2 turned off or not a service, hidden'
+  given_remote_service lora-server 3c3c3c3c 202610010900
+  given_remote_unit lora-server ActiveState=activating SubState=auto-restart Result=exec-condition
+  run_gw status alpha
+  assert_contains "$gw_stderr" '3 turned off or not a service, hidden'
+  assert_lacks "$gw_stdout" 'crash loop'
   run_gw status alpha --all
-  assert_contains "$gw_stdout" 'redis    b765d0db  2026-08-20 07:48  not a service  -'
-  assert_contains "$gw_stdout" 'gpio     08dae81a  2026-03-18 07:06  disabled       -'
+  assert_contains "$gw_stdout" 'lora-server  3c3c3c3c  2026-10-01 09:00  off by config  -'
+  assert_contains "$gw_stdout" 'redis        b765d0db  2026-08-20 07:48  not a service  -'
+  assert_contains "$gw_stdout" 'gpio         08dae81a  2026-03-18 07:06  disabled       -'
   assert_lacks "$gw_stderr" hidden
   run_gw status alpha redis
   assert_contains "$gw_stdout" 'redis    b765d0db'
@@ -49,7 +55,7 @@ test_status_formats_how_long_ago_a_service_started() {
 test_status_maps_every_systemd_state() {
   given_alias alpha td@alpha.local
   local service
-  for service in up finished oneshot off masked starting stopping stopped crashed; do
+  for service in up finished oneshot off masked starting stopping stopped crashed looping skipped; do
     given_remote_service $service aaaaaaaa
   done
   given_remote_unit up
@@ -61,11 +67,14 @@ test_status_maps_every_systemd_state() {
   given_remote_unit stopping ActiveState=deactivating SubState=stop
   given_remote_unit stopped ActiveState=inactive SubState=dead
   given_remote_unit crashed ActiveState=failed SubState=failed
+  given_remote_unit looping ActiveState=activating SubState=auto-restart Result=exit-code
+  given_remote_unit skipped ActiveState=activating SubState=auto-restart Result=exec-condition
 
   run_gw status alpha --all
   local expectation
   for expectation in 'up running' 'finished done' 'oneshot idle' 'off disabled' 'masked disabled' \
-    'starting starting' 'stopping stopping' 'stopped stopped' 'crashed crashed'; do
+    'starting starting' 'stopping stopping' 'stopped stopped' 'crashed crashed' \
+    'looping crash loop' 'skipped off by config'; do
     [[ $gw_stdout =~ "${expectation%% *} +aaaaaaaa +[0-9: -]+ +${expectation#* }" ]] ||
       fail "expected service ${expectation%% *} to be ${expectation#* }"
   done

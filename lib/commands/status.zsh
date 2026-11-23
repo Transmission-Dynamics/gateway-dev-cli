@@ -40,7 +40,7 @@ status_read() {
 status_show() {
   gw_print_status
   if (( gw_status_hidden > 0 )); then
-    gw_hint "$gw_status_hidden disabled or not a service, hidden. Show them with:" "gw status${gw_gateway_word:+ $gw_gateway_word} --all"
+    gw_hint "$gw_status_hidden turned off or not a service, hidden. Show them with:" "gw status${gw_gateway_word:+ $gw_gateway_word} --all"
   fi
   if gw_has_flag --verbose; then gw_print_state_legend; fi
 }
