@@ -7,10 +7,6 @@ gw_expand_path() {
   print -r -- "${1/#\~/$HOME}"
 }
 
-gw_shorten_path() {
-  print -r -- "${1/#$HOME/~}"
-}
-
 gw_config_entries() {
   local file=$1
   [[ -f $file ]] || return 0

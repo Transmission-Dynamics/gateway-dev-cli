@@ -24,12 +24,9 @@ gw_remove_temp_dir() {
 }
 
 gw_elapsed() {
-  local seconds=$(( SECONDS - $1 ))
-  if (( seconds >= 60 )); then
-    printf '%dm %02ds\n' $(( seconds / 60 )) $(( seconds % 60 ))
-  else
-    printf '%ds\n' "$seconds"
-  fi
+  local REPLY
+  gw_duration_label $(( SECONDS - $1 ))
+  print -r -- "$REPLY"
 }
 
 gw_in_dir() {

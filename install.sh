@@ -6,6 +6,7 @@ setopt err_exit no_unset pipe_fail
 
 GW_ROOT=${0:A:h}
 source "$GW_ROOT/lib/ui.zsh"
+source "$GW_ROOT/lib/format.zsh"
 source "$GW_ROOT/lib/install.zsh"
 
 BIN_DIR=$HOME/.local/bin
@@ -17,10 +18,10 @@ gw_heading 'Installing gw'
 mkdir -p "$BIN_DIR"
 if [[ -e $BIN_DIR/gw && ! -L $BIN_DIR/gw ]]; then
   mv "$BIN_DIR/gw" "$BIN_DIR/gw.before-install"
-  gw_warn "Moved the existing $(gw_install_path "$BIN_DIR/gw") to gw.before-install"
+  gw_warn "Moved the existing $(gw_shorten_path "$BIN_DIR/gw") to gw.before-install"
 fi
 ln -sfn "$GW_ROOT/bin/gw" "$BIN_DIR/gw"
-gw_ok "Linked $(gw_install_path "$BIN_DIR/gw") ${E[muted]}→${E[reset]} $(gw_install_path "$GW_ROOT/bin/gw")"
+gw_ok "Linked $(gw_shorten_path "$BIN_DIR/gw") ${E[muted]}→${E[reset]} $(gw_shorten_path "$GW_ROOT/bin/gw")"
 
 gw_zshrc_without_block "$ZSHRC" > "$ZSHRC.gw-new"
 {
@@ -30,23 +31,23 @@ gw_zshrc_without_block "$ZSHRC" > "$ZSHRC.gw-new"
 } >> "$ZSHRC.gw-new"
 if [[ -f $ZSHRC ]] && cmp -s "$ZSHRC" "$ZSHRC.gw-new"; then
   rm -f "$ZSHRC.gw-new"
-  gw_ok "$(gw_install_path "$ZSHRC") already loads the shell integration"
+  gw_ok "$(gw_shorten_path "$ZSHRC") already loads the shell integration"
 else
   gw_replace_zshrc "$ZSHRC" "$ZSHRC.gw-new"
-  gw_ok "Added the shell integration to $(gw_install_path "$ZSHRC") ${E[muted]}(sessions, prompt, tab completion)${E[reset]}"
-  [[ ! -f $ZSHRC.before-gw ]] || gw_note "The previous version is in $(gw_install_path "$ZSHRC.before-gw")"
+  gw_ok "Added the shell integration to $(gw_shorten_path "$ZSHRC") ${E[muted]}(sessions, prompt, tab completion)${E[reset]}"
+  [[ ! -f $ZSHRC.before-gw ]] || gw_note "The previous version is in $(gw_shorten_path "$ZSHRC.before-gw")"
 fi
 if gw_zshrc_without_block "$ZSHRC" | grep -q '^gw()'; then
-  gw_warn "$(gw_install_path "$ZSHRC") also defines gw() by hand; it is overridden now and can be deleted"
+  gw_warn "$(gw_shorten_path "$ZSHRC") also defines gw() by hand; it is overridden now and can be deleted"
 fi
 
 mkdir -p "$CONFIG_DIR"
 for file in aliases targets repos; do
   if [[ -e $CONFIG_DIR/$file ]]; then
-    gw_note "  Kept your $(gw_install_path "$CONFIG_DIR/$file")"
+    gw_note "  Kept your $(gw_shorten_path "$CONFIG_DIR/$file")"
   else
     cp "$GW_ROOT/examples/$file" "$CONFIG_DIR/$file"
-    gw_ok "Created $(gw_install_path "$CONFIG_DIR/$file") from the example"
+    gw_ok "Created $(gw_shorten_path "$CONFIG_DIR/$file") from the example"
   fi
 done
 

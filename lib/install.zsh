@@ -1,10 +1,6 @@
 GW_ZSHRC_BLOCK_START='# >>> gw >>>'
 GW_ZSHRC_BLOCK_END='# <<< gw <<<'
 
-gw_install_path() {
-  print -r -- "${1/#$HOME/~}"
-}
-
 gw_zshrc_without_block() {
   local zshrc=$1
   [[ -f $zshrc ]] || return 0

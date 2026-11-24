@@ -23,6 +23,7 @@ GW_DEVICES_RECENT_SECONDS=600
 
 typeset -g devices_type='' devices_since='' devices_since_seconds=0
 typeset -ga devices_columns=()
+typeset -gA devices_seen_seconds=()
 typeset -g devices_rows=''
 
 cmd_devices() {
@@ -74,16 +75,18 @@ devices_print() {
   devices_columns=(UUID TYPE RSSI AGO BATTERY)
   if gw_has_flag --verbose; then devices_columns+=(TEMP); fi
   devices_columns+=(TASKS)
-  {
-    print -r -- "${(pj:\t:)devices_columns}"
-    for line in "${lines[@]}"; do
-      fields=("${(@ps:\t:)line}")
-      print -rn -- "${fields[1]}"$'\t'"${fields[2]:--}"$'\t'"${fields[3]:--}"$'\t'"$(devices_ago_label "${fields[5]}")"
-      print -rn -- $'\t'"$(devices_measurement "${fields[6]:-}" '%.2f V')"
-      if gw_has_flag --verbose; then print -rn -- $'\t'"$(devices_measurement "${fields[7]:-}" '%.1f °C')"; fi
-      print -r -- $'\t'"${fields[8]:--}"
-    done
-  } | gw_table devices_style_cell
+  devices_seen_seconds=()
+  local -a table=("${(pj:\t:)devices_columns}")
+  local row
+  for line in "${lines[@]}"; do
+    fields=("${(@ps:\t:)line}")
+    devices_ago_cell "${fields[1]}" "${fields[5]}"
+    row="${fields[1]}"$'\t'"${fields[2]:--}"$'\t'"${fields[3]:--}"$'\t'"$REPLY"
+    row+=$'\t'"$(devices_measurement "${fields[6]:-}" '%.2f V')"
+    if gw_has_flag --verbose; then row+=$'\t'"$(devices_measurement "${fields[7]:-}" '%.1f °C')"; fi
+    table+=("$row"$'\t'"${fields[8]:--}")
+  done
+  print -rl -- "${table[@]}" | gw_table devices_style_cell
   print
   print -r -- "${C[muted]}$count $(devices_plural "$count") seen in the last $devices_since$(devices_filter_label)${C[reset]}"
   if [[ ${lines[1]} == *$'\t?' ]]; then
@@ -111,16 +114,12 @@ devices_plural() {
   if (( $1 == 1 )); then print -r -- device; else print -r -- devices; fi
 }
 
-devices_ago_label() {
-  local seconds=${1:-}
-  [[ $seconds == <-> ]] || { print -r -- -; return; }
-  if (( seconds < 60 )); then
-    print -r -- "${seconds}s"
-  elif (( seconds < 3600 )); then
-    printf '%dm %02ds\n' $(( seconds / 60 )) $(( seconds % 60 ))
-  else
-    printf '%dh %02dm\n' $(( seconds / 3600 )) $(( seconds % 3600 / 60 ))
-  fi
+devices_ago_cell() {
+  local uuid=$1 seconds=$2
+  REPLY=-
+  [[ $seconds == <-> ]] || return 0
+  devices_seen_seconds[$uuid]=$seconds
+  gw_duration_label "$seconds"
 }
 
 devices_measurement() {
@@ -130,18 +129,6 @@ devices_measurement() {
   else
     printf "$format\n" "$value"
   fi
-}
-
-devices_ago_seconds() {
-  local label=$1 hours=0 minutes=0 seconds=0
-  if [[ $label =~ '^([0-9]+)h ([0-9]+)m$' ]]; then
-    hours=${match[1]}; minutes=${match[2]}
-  elif [[ $label =~ '^([0-9]+)m ([0-9]+)s$' ]]; then
-    minutes=${match[1]}; seconds=${match[2]}
-  elif [[ $label =~ '^([0-9]+)s$' ]]; then
-    seconds=${match[1]}
-  fi
-  REPLY=$(( 10#$hours * 3600 + 10#$minutes * 60 + 10#$seconds ))
 }
 
 devices_style_cell() {
@@ -155,9 +142,9 @@ devices_style_cell() {
       fi
       ;;
     AGO)
-      devices_ago_seconds "$cell"
-      if (( REPLY < GW_DEVICES_FRESH_SECONDS )); then REPLY=${C[good]}
-      elif (( REPLY < GW_DEVICES_RECENT_SECONDS )); then REPLY=${C[caution]}
+      local -i seconds=${devices_seen_seconds[$3]:-0}
+      if (( seconds < GW_DEVICES_FRESH_SECONDS )); then REPLY=${C[good]}
+      elif (( seconds < GW_DEVICES_RECENT_SECONDS )); then REPLY=${C[caution]}
       else REPLY=${C[muted]}
       fi
       ;;

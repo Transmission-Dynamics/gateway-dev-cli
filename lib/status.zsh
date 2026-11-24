@@ -41,19 +41,6 @@ gw_style_status_cell() {
   esac
 }
 
-gw_duration_label() {
-  local seconds=$1
-  if (( seconds < 60 )); then
-    REPLY="${seconds}s"
-  elif (( seconds < 3600 )); then
-    REPLY="$(( seconds / 60 ))m"
-  elif (( seconds < 86400 )); then
-    printf -v REPLY '%dh %02dm' $(( seconds / 3600 )) $(( seconds % 3600 / 60 ))
-  else
-    printf -v REPLY '%dd %dh' $(( seconds / 86400 )) $(( seconds % 86400 / 3600 ))
-  fi
-}
-
 gw_started_label() {
   if [[ $1 != <-> ]]; then
     REPLY=-
@@ -61,15 +48,6 @@ gw_started_label() {
   fi
   gw_duration_label "$1"
   REPLY="$REPLY ago"
-}
-
-gw_size_label() {
-  local -i bytes=$1
-  if (( bytes >= 1073741824 )); then
-    printf -v REPLY '%.1f GB' $(( bytes / 1073741824.0 ))
-  else
-    REPLY="$(( (bytes + 524288) / 1048576 )) MB"
-  fi
 }
 
 gw_show_status() {

@@ -47,7 +47,7 @@ test_status_formats_how_long_ago_a_service_started() {
   run_gw status alpha
   assert_contains "$gw_stdout" 'seconds  aaaaaaaa'
   [[ $gw_stdout =~ 'seconds .* 15s ago' ]] || fail "expected 15s ago: $gw_stdout"
-  [[ $gw_stdout =~ 'minutes .* 12m ago' ]] || fail "expected 12m ago: $gw_stdout"
+  [[ $gw_stdout =~ 'minutes .* 12m 00s ago' ]] || fail "expected 12m 00s ago: $gw_stdout"
   [[ $gw_stdout =~ 'hours .* 20h 05m ago' ]] || fail "expected 20h 05m ago: $gw_stdout"
   [[ $gw_stdout =~ 'days .* 4d 3h ago' ]] || fail "expected 4d 3h ago: $gw_stdout"
 }

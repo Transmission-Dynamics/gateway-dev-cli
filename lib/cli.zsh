@@ -387,11 +387,3 @@ gw_closest_or_prefix() {
     fi
   done
 }
-
-gw_parse_duration() {
-  local duration=$1
-  [[ $duration =~ '^([0-9]+)([smhd]?)$' ]] || return 1
-  local -A unit_seconds=(s 1 m 60 h 3600 d 86400 '' 1)
-  REPLY=$(( match[1] * unit_seconds[${match[2]}] ))
-  (( REPLY > 0 ))
-}
