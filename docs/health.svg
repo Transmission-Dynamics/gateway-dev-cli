@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="443" height="188" viewBox="0 0 443 188" role="img" aria-label="gw health output">
+<rect width="100%" height="100%" rx="8" fill="#0d1117" stroke="#30363d"/>
+<circle cx="18" cy="15" r="5" fill="#ff5f57"/><circle cx="36" cy="15" r="5" fill="#febc2e"/><circle cx="54" cy="15" r="5" fill="#28c840"/>
+<g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#e6edf3" xml:space="preserve">
+<text y="52.0"><tspan x="18.0" fill="#8b949e">$</tspan><tspan x="33.7">gw</tspan><tspan x="57.1">health</tspan><tspan x="112.0">alpha</tspan></text>
+<text y="72.0"><tspan x="18.0">📡</tspan><tspan x="41.5" fill="#8b949e">Gateway:</tspan><tspan x="112.0" fill="#39c5cf" font-weight="bold">td@alpha.local</tspan></text>
+<text y="92.0"><tspan x="18.0" font-weight="bold">Resources</tspan><tspan x="104.1" fill="#8b949e">up</tspan><tspan x="127.6" fill="#8b949e">6d</tspan><tspan x="151.1" fill="#8b949e">4h</tspan></text>
+<rect x="104.1" y="101.0" width="23.49" height="14" fill="#e6edf3" fill-opacity="1.0"/>
+<rect x="127.6" y="101.0" width="54.81" height="14" fill="#8b949e" fill-opacity="0.35"/>
+<text y="112.0"><tspan x="33.7">CPU</tspan><tspan x="205.9">31%</tspan><tspan x="245.1" fill="#8b949e">load</tspan><tspan x="284.2" fill="#8b949e">0.62</tspan><tspan x="323.4" fill="#8b949e">on</tspan><tspan x="346.9" fill="#8b949e">2</tspan><tspan x="362.5" fill="#8b949e">CPUs</tspan></text>
+<rect x="104.1" y="121.0" width="62.64" height="14" fill="#d29922" fill-opacity="1.0"/>
+<rect x="166.8" y="121.0" width="15.66" height="14" fill="#8b949e" fill-opacity="0.35"/>
+<text y="132.0"><tspan x="33.7">Memory</tspan><tspan x="205.9" fill="#d29922">78%</tspan><tspan x="245.1" fill="#8b949e">859</tspan><tspan x="276.4" fill="#8b949e">MB</tspan><tspan x="299.9" fill="#8b949e">free</tspan><tspan x="339.0" fill="#8b949e">of</tspan><tspan x="362.5" fill="#8b949e">3.8</tspan><tspan x="393.8" fill="#8b949e">GB</tspan></text>
+<rect x="104.1" y="141.0" width="7.83" height="14" fill="#e6edf3" fill-opacity="1.0"/>
+<rect x="112.0" y="141.0" width="70.47" height="14" fill="#8b949e" fill-opacity="0.35"/>
+<text y="152.0"><tspan x="33.7">SD</tspan><tspan x="57.1">card</tspan><tspan x="205.9">12%</tspan><tspan x="245.1" fill="#8b949e">53.7</tspan><tspan x="284.2" fill="#8b949e">GB</tspan><tspan x="307.7" fill="#8b949e">free</tspan></text>
+<rect x="104.1" y="161.0" width="31.32" height="14" fill="#e6edf3" fill-opacity="1.0"/>
+<rect x="135.4" y="161.0" width="46.98" height="14" fill="#8b949e" fill-opacity="0.35"/>
+<text y="172.0"><tspan x="33.7">System</tspan><tspan x="205.9">41%</tspan><tspan x="245.1" fill="#8b949e">4.5</tspan><tspan x="276.4" fill="#8b949e">GB</tspan><tspan x="299.9" fill="#8b949e">free</tspan></text>
+</g></svg>
