@@ -107,3 +107,6 @@ release, and sets the **Latest release:** line in README.md on `main` (`scripts/
 
 `get.sh` and `gw update` install a release into `~/.local/share/gw/<version>`. To work on gw, clone it and run
 `./install.sh` instead.
+
+The pictures in `docs/` are real `gw` output against the test fakes. Redraw them with
+`scripts/render-readme-svgs.zsh` after changing what `status`, `devices` or `health` print.

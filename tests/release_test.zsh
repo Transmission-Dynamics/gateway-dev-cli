@@ -104,3 +104,22 @@ test_readme_release_line_must_exist() {
 test_readme_shows_a_latest_release_line() {
   grep -q '^\*\*Latest release:\*\* \[v' "$GW_REPO/README.md" || fail 'README.md has no **Latest release:** line'
 }
+
+picture_text() {
+  sed -e 's/<[^>]*>/ /g' "$1" | tr -s ' '
+}
+
+test_readme_pictures_are_drawn_from_real_output() {
+  local pictures=$GW_TEST_DIR/docs
+  "$GW_REPO/scripts/render-readme-svgs.zsh" "$pictures" > /dev/null || fail 'render-readme-svgs.zsh failed'
+  assert_contains "$(picture_text "$pictures/status.svg")" ' crash loop '
+  assert_contains "$(picture_text "$pictures/status.svg")" ' 3m 05s ago '
+  assert_contains "$(picture_text "$pictures/devices.svg")" ' download, upload '
+  assert_contains "$(picture_text "$pictures/health.svg")" ' 78% '
+  assert_contains "$(< "$pictures/health.svg")" '<rect'
+  assert_lacks "$(cat "$pictures"/*.svg)" $'\e'
+  local picture
+  for picture in status devices health; do
+    grep -q "docs/$picture.svg" "$GW_REPO/README.md" || fail "README.md does not show docs/$picture.svg"
+  done
+}
