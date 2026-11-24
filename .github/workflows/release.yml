@@ -20,4 +20,25 @@ jobs:
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" "dist/gw-$GITHUB_REF_NAME.tar.gz" --title "$GITHUB_REF_NAME" --generate-notes
+        run: |
+          cat > notes.md <<NOTES
+          ## Install
+
+          \`\`\`zsh
+          gh api repos/$GITHUB_REPOSITORY/contents/get.sh -H 'Accept: application/vnd.github.raw' | zsh
+          \`\`\`
+
+          Already installed? Run \`gw update\`. More in the [README](https://github.com/$GITHUB_REPOSITORY#-install).
+          NOTES
+          gh release create "$GITHUB_REF_NAME" "dist/gw-$GITHUB_REF_NAME.tar.gz" \
+            --title "$GITHUB_REF_NAME" --notes-file notes.md --generate-notes
+      - name: Show the release in README
+        run: |
+          git fetch origin main
+          git checkout main
+          ./scripts/set-readme-release.sh "$GITHUB_REF_NAME"
+          if git diff --quiet README.md; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m "Docs: Show $GITHUB_REF_NAME as the latest release" README.md
+          git push origin main

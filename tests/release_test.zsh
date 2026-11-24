@@ -69,3 +69,21 @@ test_update_from_a_clone_points_to_git_pull() {
   assert_contains "$gw_stderr" 'runs from a git clone'
   assert_contains "$gw_stderr" 'pull'
 }
+
+test_readme_release_line_points_at_the_new_version() {
+  local readme=$GW_TEST_DIR/README.md
+  print -r -- $'# gw\n\n**Latest release:** [v0.1.0](https://example.com)\n\nmore' > "$readme"
+  GW_README=$readme "$GW_REPO/scripts/set-readme-release.sh" v1.2.3 || fail 'set-readme-release.sh failed'
+  assert_file_equals "$readme" $'# gw\n\n**Latest release:** [v1.2.3](https://github.com/Transmission-Dynamics/gateway-dev-cli/releases/tag/v1.2.3)\n\nmore'
+}
+
+test_readme_release_line_must_exist() {
+  local readme=$GW_TEST_DIR/README.md
+  print -r -- '# gw' > "$readme"
+  GW_README=$readme "$GW_REPO/scripts/set-readme-release.sh" v1.2.3 > /dev/null 2>&1 && fail 'accepted a README without the line'
+  assert_file_equals "$readme" '# gw'
+}
+
+test_readme_shows_a_latest_release_line() {
+  grep -q '^\*\*Latest release:\*\* \[v' "$GW_REPO/README.md" || fail 'README.md has no **Latest release:** line'
+}

@@ -98,5 +98,6 @@ Real deploys and restarts aren't covered, so try those on a gateway before you m
 
 Push a tag like `v0.2.0` on `main`. The Release workflow runs the tests, packs the repo with
 `scripts/package.sh` (adds `VERSION`, drops what `.gitattributes` marks `export-ignore`) and publishes a GitHub
-release. `get.sh` and `gw update` install the newest release into `~/.local/share/gw/<version>`. To work on gw,
+release. It then sets the **Latest release:** line in README.md on `main`
+(`scripts/set-readme-release.sh`). `get.sh` and `gw update` install the newest release into `~/.local/share/gw/<version>`. To work on gw,
 clone it and run `./install.sh` instead.
