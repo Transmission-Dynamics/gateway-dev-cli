@@ -3,10 +3,22 @@ echo "gh $*" >> "$GW_TEST_DIR/gh.log"
 case $1 in
   auth) [ -z "${GW_TEST_GH_SIGNED_OUT:-}" ] ;;
   release)
+    action=$2
+    shift 2
+    case $1 in -*) tag='' ;; *) tag=$1 ;; esac
     while [ $# -gt 0 ]; do
       [ "$1" = --dir ] && dir=$2
       shift
     done
-    cp "$GW_TEST_DIR"/release/*.tar.gz "$dir/"
+    if [ -z "$tag" ]; then
+      archive=$(ls "$GW_TEST_DIR"/release/*.tar.gz | tail -n 1)
+    else
+      archive=$GW_TEST_DIR/release/gw-$tag.tar.gz
+    fi
+    [ -f "$archive" ] || { echo 'release not found' >&2; exit 1; }
+    case $action in
+      view) basename "$archive" .tar.gz | sed 's/^gw-//' ;;
+      download) cp "$archive" "$dir/" ;;
+    esac
     ;;
 esac

@@ -12,5 +12,5 @@ cmd_update() {
     gw_die_with_hint "gw runs from a git clone in $(gw_shorten_path "$GW_ROOT"), so it updates with git" \
       'Update with:' "git -C $(gw_shorten_path "$GW_ROOT") pull"
   fi
-  exec zsh "$GW_ROOT/get.sh" "${gw_arguments[@]}"
+  GW_CURRENT_VERSION=$(< "$GW_ROOT/VERSION") exec zsh "$GW_ROOT/get.sh" "${gw_arguments[@]}"
 }

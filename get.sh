@@ -16,20 +16,30 @@ fail() {
   exit 1
 }
 
-download_with_gh() {
+find_with_gh() {
   local -a tag=()
   [[ $wanted == latest ]] || tag=("$wanted")
-  gh release download "${tag[@]}" --repo "$repo" --pattern 'gw-*.tar.gz' --dir "$work" ||
-    fail "Could not download $label of $repo" 'Check that you can open the repo with: gh repo view '"$repo"
+  release_tag=$(gh release view "${tag[@]}" --repo "$repo" --json tagName --jq .tagName 2> /dev/null) ||
+    fail "Could not find $label of $repo" "Check that you can open the repo with: gh repo view $repo"
 }
 
-download_with_token() {
-  local release=latest url name
+download_with_gh() {
+  gh release download "$release_tag" --repo "$repo" --pattern 'gw-*.tar.gz' --dir "$work" ||
+    fail "Could not download $release_tag of $repo"
+}
+
+find_with_token() {
+  local release=latest
   [[ $wanted == latest ]] || release=tags/$wanted
   curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" -o "$work/release.json" \
     "https://api.github.com/repos/$repo/releases/$release" ||
-    fail "Could not read $label of $repo" 'Check that GITHUB_TOKEN can read the repo'
-  url=$(plutil -extract assets.0.url raw -o - "$work/release.json") || fail "The release has no gw archive"
+    fail "Could not find $label of $repo" 'Check that GITHUB_TOKEN can read the repo'
+  release_tag=$(plutil -extract tag_name raw -o - "$work/release.json")
+}
+
+download_with_token() {
+  local url name
+  url=$(plutil -extract assets.0.url raw -o - "$work/release.json") || fail "$release_tag has no gw archive"
   name=$(plutil -extract assets.0.name raw -o - "$work/release.json")
   curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/octet-stream' -o "$work/$name" "$url" ||
     fail "Could not download $name"
@@ -37,15 +47,23 @@ download_with_token() {
 
 work=$(mktemp -d "${${TMPDIR:-/tmp}%/}/gw-get.XXXXXX")
 trap 'rm -rf "$work"' EXIT
+release_tag=''
 
-print -u2 -r -- "==> Downloading $label of $repo"
 if whence -p gh > /dev/null && gh auth status --hostname github.com > /dev/null 2>&1; then
-  download_with_gh
+  source=gh
 elif [[ -n ${GITHUB_TOKEN:-} ]]; then
-  download_with_token
+  source=token
 else
-  fail "$repo is private, so sign in to GitHub first" 'Run: gh auth login   (or export GITHUB_TOKEN=<a token that can read the repo>)'
+  fail 'Sign in to GitHub first, the repo needs a login' 'Run: gh auth login   (or export GITHUB_TOKEN=<a token that can read the repo>)'
 fi
+
+find_with_$source
+if [[ $release_tag == "${GW_CURRENT_VERSION:-}" ]]; then
+  print -u2 -r -- "✓ gw $release_tag is already installed"
+  exit 0
+fi
+print -u2 -r -- "==> Downloading gw $release_tag from $repo"
+download_with_$source
 
 archives=("$work"/gw-*.tar.gz(N))
 (( ${#archives} == 1 )) || fail 'The release does not contain one gw archive'

@@ -20,7 +20,8 @@ test_get_installs_the_latest_release_and_removes_older_ones() {
   assert_exit 0
   assert_file_equals "$GW_TEST_DIR/installed-from" "$HOME/.local/share/gw/v1.2.3"
   assert_missing "$HOME/.local/share/gw/v0.0.1"
-  assert_contains "$(< "$GW_TEST_DIR/gh.log")" 'gh release download --repo Transmission-Dynamics/gateway-dev-cli --pattern gw-*.tar.gz'
+  assert_contains "$(< "$GW_TEST_DIR/gh.log")" 'gh release view --repo Transmission-Dynamics/gateway-dev-cli'
+  assert_contains "$(< "$GW_TEST_DIR/gh.log")" 'gh release download v1.2.3 --repo Transmission-Dynamics/gateway-dev-cli --pattern gw-*.tar.gz'
 }
 
 test_get_installs_the_version_asked_for() {
@@ -30,10 +31,26 @@ test_get_installs_the_version_asked_for() {
   assert_contains "$(< "$GW_TEST_DIR/gh.log")" 'gh release download v1.0.0 --repo'
 }
 
+test_get_stops_when_that_version_is_already_installed() {
+  given_release v1.2.3
+  GW_CURRENT_VERSION=v1.2.3 run_get
+  assert_exit 0
+  assert_contains "$gw_stderr" 'gw v1.2.3 is already installed'
+  assert_lacks "$(< "$GW_TEST_DIR/gh.log")" 'release download'
+  assert_missing "$GW_TEST_DIR/installed-from"
+}
+
+test_get_an_unknown_version_says_so() {
+  given_release v1.2.3
+  run_get v9.9.9
+  assert_exit 1
+  assert_contains "$gw_stderr" 'Could not find v9.9.9'
+}
+
 test_get_without_a_github_login_says_how_to_sign_in() {
   GW_TEST_GH_SIGNED_OUT=1 GITHUB_TOKEN='' run_get
   assert_exit 1
-  assert_contains "$gw_stderr" 'is private, so sign in to GitHub first'
+  assert_contains "$gw_stderr" 'Sign in to GitHub first'
   assert_contains "$gw_stderr" 'gh auth login'
 }
 
@@ -58,9 +75,9 @@ test_installed_release_reports_its_version_and_updates_with_get() {
   mkdir -p "$copy"
   cp -R "$GW_REPO/bin" "$GW_REPO/lib" "$copy/"
   print -r -- v1.2.3 > "$copy/VERSION"
-  print -r -- 'print -r -- "get $*"' > "$copy/get.sh"
+  print -r -- 'print -r -- "get $* from $GW_CURRENT_VERSION"' > "$copy/get.sh"
   assert_equals 'gw v1.2.3' "$("$copy/bin/gw" --version)"
-  assert_equals 'get v2.0.0' "$("$copy/bin/gw" update v2.0.0 2> /dev/null)"
+  assert_equals 'get v2.0.0 from v1.2.3' "$("$copy/bin/gw" update v2.0.0 2> /dev/null)"
 }
 
 test_update_from_a_clone_points_to_git_pull() {
