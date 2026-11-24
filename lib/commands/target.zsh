@@ -7,8 +7,8 @@ gw_command target \
   note 'Without ENV_VAR the whole file is the address, as in scripts/target.' \
   note 'With ENV_VAR only the line ENV_VAR=http://<address> is set, as in .env.' \
   note 'Files that share a name switch together.' \
-  example 'gw target add rest ~/repos/td1023-rest/scripts/target' \
-  example 'gw target add frontend ~/repos/td1023-frontend-react/.env VITE_PROXY_TARGET' \
+  example 'gw target add rest ~/repos/my-rest-api/scripts/target' \
+  example 'gw target add frontend ~/repos/my-frontend/.env VITE_PROXY_TARGET' \
   example 'gw target rm frontend'
 
 cmd_target() {

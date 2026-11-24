@@ -2,7 +2,7 @@ test_status_lists_deployed_services_newest_first() {
   given_alias alpha td@alpha.local
   given_remote_service rest-api 7bcc430599999999 202610291259
   given_remote_service transceiver 96bd878811111111 202610301118
-  given_remote_service redis b765d0db22222222 202608200748
+  given_remote_service cache b765d0db22222222 202608200748
   given_remote_unit rest-api
   given_remote_unit transceiver ActiveState=activating SubState=auto-restart
 
@@ -16,24 +16,24 @@ rest-api     7bcc4305  2026-10-29 12:59  running     20h 05m ago' "$gw_stdout"
 
 test_status_all_and_named_services_show_hidden_ones() {
   given_alias alpha td@alpha.local
-  given_remote_service redis b765d0db22222222 202608200748
+  given_remote_service cache b765d0db22222222 202608200748
   given_remote_service gpio 08dae81a 202603180706
   given_remote_unit gpio ActiveState=inactive SubState=dead UnitFileState=disabled
   run_gw status alpha
   assert_equals '' "$gw_stdout"
   assert_contains "$gw_stderr" '2 turned off or not a service, hidden'
-  given_remote_service lora-server 3c3c3c3c 202610010900
-  given_remote_unit lora-server ActiveState=activating SubState=auto-restart Result=exec-condition
+  given_remote_service radio-relay 3c3c3c3c 202610010900
+  given_remote_unit radio-relay ActiveState=activating SubState=auto-restart Result=exec-condition
   run_gw status alpha
   assert_contains "$gw_stderr" '3 turned off or not a service, hidden'
   assert_lacks "$gw_stdout" 'crash loop'
   run_gw status alpha --all
-  assert_contains "$gw_stdout" 'lora-server  3c3c3c3c  2026-10-01 09:00  off by config  -'
-  assert_contains "$gw_stdout" 'redis        b765d0db  2026-08-20 07:48  not a service  -'
+  assert_contains "$gw_stdout" 'radio-relay  3c3c3c3c  2026-10-01 09:00  off by config  -'
+  assert_contains "$gw_stdout" 'cache        b765d0db  2026-08-20 07:48  not a service  -'
   assert_contains "$gw_stdout" 'gpio         08dae81a  2026-03-18 07:06  disabled       -'
   assert_lacks "$gw_stderr" hidden
-  run_gw status alpha redis
-  assert_contains "$gw_stdout" 'redis    b765d0db'
+  run_gw status alpha cache
+  assert_contains "$gw_stdout" 'cache    b765d0db'
 }
 
 test_status_formats_how_long_ago_a_service_started() {
@@ -144,23 +144,23 @@ test_submodules_prints_a_grid_sorted_by_use() {
   given_alias alpha td@alpha.local
   given_remote_manifest rest-api <<'JSON'
 { "name": "rest", "version": "v1.37.0-cc02c60", "submodules": [
-  { "name": "td1023-db", "version": "v1.44.0-3a0ec49" },
-  { "name": "protobuf", "version": "v1.1.0-4383403" } ] }
+  { "name": "shared-db", "version": "v1.44.0-3a0ec49" },
+  { "name": "messages", "version": "v1.1.0-4383403" } ] }
 JSON
   given_remote_manifest transceiver <<'JSON'
 { "name": "transceiver", "version": "v1.47.1", "submodules": [
-  { "name": "td1023-db", "version": "v1.45.2" } ] }
+  { "name": "shared-db", "version": "v1.45.2" } ] }
 JSON
-  given_remote_manifest iobroker <<'JSON'
-{ "name": "iobroker", "version": "v1.7.1", "submodules": [] }
+  given_remote_manifest io-relay <<'JSON'
+{ "name": "io-relay", "version": "v1.7.1", "submodules": [] }
 JSON
 
   run_gw submodules alpha
   assert_exit 0
-  assert_contains "$gw_stdout" 'SERVICE      VERSION          td1023-db        protobuf
+  assert_contains "$gw_stdout" 'SERVICE      VERSION          shared-db        messages
 rest-api     v1.37.0-cc02c60  v1.44.0-3a0ec49  v1.1.0-4383403
 transceiver  v1.47.1          v1.45.2          -
-iobroker     v1.7.1           -                -'
+io-relay     v1.7.1           -                -'
   assert_contains "$gw_stdout" 'newest  behind  major version behind  unknown'
 }
 
@@ -187,9 +187,9 @@ JSON
 
 test_submodules_named_service_without_manifest_is_shown() {
   given_alias alpha td@alpha.local
-  given_remote_service gsm fbf8fe2e
-  run_gw submodules alpha gsm
-  assert_contains "$gw_stdout" 'gsm      (no manifest)'
+  given_remote_service nfc fbf8fe2e
+  run_gw submodules alpha nfc
+  assert_contains "$gw_stdout" 'nfc      (no manifest)'
 }
 
 test_submodules_without_any_manifest_says_so() {
@@ -272,10 +272,10 @@ test_logs_follows_the_transceiver_by_default() {
 test_logs_of_several_services_since_a_time_without_following() {
   given_alias alpha td@alpha.local
   given_remote_unit rest-api
-  given_remote_unit voltage-monitor
-  run_gw logs alpha rest-api voltage-monitor --since 10m --no-follow
+  given_remote_unit battery-monitor
+  run_gw logs alpha rest-api battery-monitor --since 10m --no-follow
   assert_exit 0
-  assert_contains "$(ssh_log)" '/usr/jrd/scripts/show_logs.sh -u td-voltage-monitor.service -u td-rest-api.service --since=-600s'
+  assert_contains "$(ssh_log)" '/usr/jrd/scripts/show_logs.sh -u td-battery-monitor.service -u td-rest-api.service --since=-600s'
   assert_lacks "$(ssh_log)" ' -f'
   run_gw logs alpha rest-api -n 200
   assert_contains "$(ssh_log)" '-u td-rest-api.service -n 200 -f'
@@ -283,11 +283,11 @@ test_logs_of_several_services_since_a_time_without_following() {
 
 test_logs_of_an_unknown_service_suggests_the_closest_one() {
   given_alias alpha td@alpha.local
-  given_remote_unit voltage-monitor
-  run_gw logs alpha voltage-monitr
+  given_remote_unit battery-monitor
+  run_gw logs alpha battery-monitr
   assert_exit 1
-  assert_contains "$gw_stderr" 'No service voltage-monitr on td@alpha.local'
-  assert_contains "$gw_stderr" 'Did you mean: gw logs alpha voltage-monitor'
+  assert_contains "$gw_stderr" 'No service battery-monitr on td@alpha.local'
+  assert_contains "$gw_stderr" 'Did you mean: gw logs alpha battery-monitor'
   assert_lacks "$(ssh_log)" show_logs.sh
 }
 

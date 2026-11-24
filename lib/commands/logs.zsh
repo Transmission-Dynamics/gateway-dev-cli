@@ -6,7 +6,7 @@ gw_command logs \
   flag '-N --no-follow' 'Print the lines and exit instead of following' \
   note 'Several services are merged into one stream, ordered by time. Press Ctrl+C to stop.' \
   example 'gw logs alpha' \
-  example 'gw logs alpha voltage-monitor --since 10m' \
+  example 'gw logs alpha battery-monitor --since 10m' \
   example 'gw logs alpha rest-api transceiver -n 200 --no-follow'
 
 GW_LOGS_SCRIPT=/usr/jrd/scripts/show_logs.sh

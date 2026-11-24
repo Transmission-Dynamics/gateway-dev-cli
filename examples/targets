@@ -1,4 +1,4 @@
-transceiver ~/<path-to>/td1023-transceiver/scripts/deployment_target
-rest-api ~/<path-to>/td1023-rest/scripts/target
-frontend ~/<path-to>/td1023-frontend-react/scripts/target
-frontend ~/<path-to>/td1023-frontend-react/.env VITE_PROXY_TARGET
+transceiver ~/<path-to>/my-transceiver/scripts/deployment_target
+rest-api ~/<path-to>/my-rest-api/scripts/target
+frontend ~/<path-to>/my-frontend/scripts/target
+frontend ~/<path-to>/my-frontend/.env VITE_PROXY_TARGET

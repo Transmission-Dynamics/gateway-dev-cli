@@ -5,7 +5,7 @@
 ```zsh
 gw session alpha      # this terminal now talks to alpha
 gw status             # what is deployed and whether it runs
-gw deploy rest-api    # build your local td1023-rest and deploy it
+gw deploy rest-api    # build your local my-rest-api and deploy it
 gw session off
 ```
 
@@ -35,8 +35,8 @@ Open a new terminal and run `gw doctor` to check the setup. Update with `gw upda
 
 ```zsh
 gw alias td@alpha.local alpha
-gw link rest-api ~/<path-to>/td1023-rest
-gw target add rest-api ~/<path-to>/td1023-rest/scripts/target
+gw link rest-api ~/<path-to>/my-rest-api
+gw target add rest-api ~/<path-to>/my-rest-api/scripts/target
 ```
 
 ## ⌨️ Commands

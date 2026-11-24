@@ -5,7 +5,7 @@ gw_command link \
   usage 'rm <service>' 'Unlink a service' \
   note 'The service name is the folder name in /usr/jrd on the gateway, for example rest-api.' \
   note 'The repo needs a package.json with a deploy script.' \
-  example 'gw link rest-api ~/repos/td1023-rest' \
+  example 'gw link rest-api ~/repos/my-rest-api' \
   example 'gw link rm rest-api'
 
 cmd_link() {
