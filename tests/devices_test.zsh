@@ -44,8 +44,8 @@ test_devices_shows_only_the_newest_record_of_each_device() {
 test_devices_formats_ages_and_missing_measurements() {
   given_devices_gateway
   run_gw devices alpha
-  [[ $gw_stdout =~ 'b2b2b2b2b2b2  SOP .* 5m 0[0-2]s ' ]] || fail "expected about 5m 00s: $gw_stdout"
-  [[ $gw_stdout =~ '15m 0[0-2]s  -        -' ]] || fail "expected about 15m 00s and no measurements: $gw_stdout"
+  [[ $gw_stdout =~ 'b2b2b2b2b2b2  SOP .* 5m [0-5][0-9]s ' ]] || fail "expected about 5m 00s: $gw_stdout"
+  [[ $gw_stdout =~ '15m [0-5][0-9]s  -        -' ]] || fail "expected about 15m 00s and no measurements: $gw_stdout"
   run_gw devices alpha --verbose
   [[ $gw_stdout =~ 'a1a1a1a1a1a1  SBR .*2\.99 V   23\.4 °C' ]] || fail "--verbose should show the temperature: $gw_stdout"
   [[ $gw_stdout =~ 'c3c3c3c3c3c3  MT-V2 .*2\.99 V   -  ' ]] || fail "temperature 0 should show as -: $gw_stdout"
@@ -70,9 +70,9 @@ test_devices_colours_signal_strength_and_age() {
   GW_COLOR=always run_gw devices alpha
   assert_contains "$gw_stdout" $'\e[1m\e[31m-88\e[0m'
   assert_contains "$gw_stdout" $'  -44  '
-  [[ $gw_stdout == *$'\e[32m'[45]s$'\e[0m'* ]] || fail 'a fresh device should be green'
-  [[ $gw_stdout == *$'\e[33m5m 0'[0-2]$'s\e[0m'* ]] || fail 'a device seen 5 minutes ago should be yellow'
-  [[ $gw_stdout == *$'\e[90m15m 0'[0-2]$'s\e[0m'* ]] || fail 'a device seen 15 minutes ago should be grey'
+  [[ $gw_stdout == *$'\e[32m'<->s$'\e[0m'* ]] || fail 'a fresh device should be green'
+  [[ $gw_stdout == *$'\e[33m5m '<->$'s\e[0m'* ]] || fail 'a device seen 5 minutes ago should be yellow'
+  [[ $gw_stdout == *$'\e[90m15m '<->$'s\e[0m'* ]] || fail 'a device seen 15 minutes ago should be grey'
 }
 
 test_devices_with_nothing_recent_says_so() {

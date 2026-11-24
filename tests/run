@@ -55,6 +55,7 @@ for test_name in "${test_names[@]}"; do
   done
   launched=$(( launched + 1 ))
   {
+    trap - INT
     exit_code=0
     run_test "$test_name" > "$results/$test_name.output" 2>&1 || exit_code=$?
     print -r -- "$exit_code" > "$results/$test_name.status"

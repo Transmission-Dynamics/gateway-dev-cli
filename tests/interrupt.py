@@ -22,6 +22,10 @@ def read_terminal(master, output):
     return True
 
 
+def running(group):
+    return subprocess.run(["ps", "-o", "pid,ppid,stat,command", "-g", str(group)], capture_output=True, text=True).stdout
+
+
 def interrupt(command):
     sandbox = Path(os.environ["GW_TEST_DIR"])
     master, slave = pty.openpty()
@@ -48,7 +52,7 @@ def interrupt(command):
             while process.poll() is None:
                 read_terminal(master, stderr)
                 if time.monotonic() >= deadline:
-                    raise RuntimeError("Deploy did not exit after Ctrl+C")
+                    raise RuntimeError("Deploy did not exit after Ctrl+C, still running:\n" + running(process.pid))
 
             deadline = time.monotonic() + 10
             while read_terminal(master, stderr):
