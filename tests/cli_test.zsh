@@ -111,3 +111,18 @@ test_cli_combined_short_flags_are_split() {
   assert_exit 2
   assert_contains "$gw_stderr" 'Unknown option for gw deploy: -x'
 }
+
+test_an_unexpected_failure_points_to_the_issues_page() {
+  local output
+  output=$(GW_ROOT=$GW_REPO zsh -c '
+    emulate -R zsh
+    setopt no_unset pipe_fail
+    source "$GW_ROOT/lib/ui.zsh"
+    source "$GW_ROOT/lib/runtime.zsh"
+    broken() { false; }
+    broken
+  ' 2>&1) && fail 'expected a failure'
+  assert_contains "$output" 'Unexpected failure'
+  assert_contains "$output" 'This is a bug in gw'
+  assert_contains "$output" 'https://github.com/Transmission-Dynamics/gateway-dev-cli/issues'
+}

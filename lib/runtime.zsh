@@ -1,3 +1,5 @@
+GW_ISSUES_URL=https://github.com/Transmission-Dynamics/gateway-dev-cli/issues
+
 typeset -ga GW_EXIT_HOOKS=()
 exec {GW_STDERR_FD}>&2
 
@@ -25,7 +27,8 @@ gw_interrupted() {
 TRAPZERR() {
   (( ZSH_SUBSHELL == 0 )) || exit 1
   gw_error "Unexpected failure at ${funcfiletrace[1]#$GW_ROOT/}"
-  gw_note 'This is a bug in gw. Please report it with the command you ran.'
+  gw_note 'This is a bug in gw. Please report it with the command you ran:'
+  gw_note "  $GW_ISSUES_URL"
   exit 1
 }
 
