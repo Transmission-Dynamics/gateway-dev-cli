@@ -14,11 +14,12 @@ test_devices_lists_connectable_devices_newest_first() {
   assert_line_order "$gw_stdout" a1a1a1a1a1a1 c3c3c3c3c3c3
   assert_line_order "$gw_stdout" c3c3c3c3c3c3 b2b2b2b2b2b2
   assert_line_order "$gw_stdout" b2b2b2b2b2b2 d4d4d4d4d4d4
-  [[ $gw_stdout =~ 'a1a1a1a1a1a1  SBR      -44   [45]s +2\.99 V   -' ]] ||
+  [[ $gw_stdout =~ 'a1a1a1a1a1a1  SBR      -44   [45]s +-' ]] ||
     fail "unexpected row for a1a1a1a1a1a1 in: $gw_stdout"
   assert_contains "$gw_stdout" '4 devices seen in the last 2h'
   assert_lacks "$gw_stdout" 'LAST SEEN'
   assert_lacks "$gw_stdout" 'TEMP'
+  assert_lacks "$gw_stdout" 'BATTERY'
 }
 
 test_devices_leaves_out_devices_older_than_the_window() {
@@ -45,9 +46,10 @@ test_devices_formats_ages_and_missing_measurements() {
   given_devices_gateway
   run_gw devices alpha
   [[ $gw_stdout =~ 'b2b2b2b2b2b2  SOP .* 5m [0-5][0-9]s ' ]] || fail "expected about 5m 00s: $gw_stdout"
-  [[ $gw_stdout =~ '15m [0-5][0-9]s  -        -' ]] || fail "expected about 15m 00s and no measurements: $gw_stdout"
+  [[ $gw_stdout =~ '15m [0-5][0-9]s  -' ]] || fail "expected about 15m 00s: $gw_stdout"
   run_gw devices alpha --verbose
-  [[ $gw_stdout =~ 'a1a1a1a1a1a1  SBR .*2\.99 V   23\.4 °C' ]] || fail "--verbose should show the temperature: $gw_stdout"
+  [[ $gw_stdout =~ '15m [0-5][0-9]s  -        -' ]] || fail "missing measurements should show as -: $gw_stdout"
+  [[ $gw_stdout =~ 'a1a1a1a1a1a1  SBR .*2\.99 V   23\.4 °C' ]] || fail "--verbose should show the battery and temperature: $gw_stdout"
   [[ $gw_stdout =~ 'c3c3c3c3c3c3  MT-V2 .*2\.99 V   -  ' ]] || fail "temperature 0 should show as -: $gw_stdout"
   run_gw devices alpha -s 1d
   assert_contains "$gw_stdout" '3h 00m'

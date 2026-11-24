@@ -4,7 +4,7 @@ gw_command devices \
   flag '-s --since <time>' 'Only devices seen within this time, like 30s, 10m, 2h or 1d (default 2h)' \
   flag '-t --type <type>' 'Only devices of this type, like SBR or MT-V2' \
   flag '-w --watch' 'Refresh every few seconds until Ctrl+C' \
-  flag '-v --verbose' 'Also show the temperature each device reports' \
+  flag '-v --verbose' 'Also show the battery voltage and temperature each device reports' \
   note 'Lists the connectable adverts the transceiver recorded, newest first. Non-connectable' \
   note 'adverts are left out, because the gateway cannot connect to a device while it sends them.' \
   note 'A device in a low-power mode, such as MTv2 pressure, is connectable only now and then,' \
@@ -72,8 +72,8 @@ devices_print() {
   fi
   local -a lines=("${(@f)rows}")
   count=${#lines}
-  devices_columns=(UUID TYPE RSSI AGO BATTERY)
-  if gw_has_flag --verbose; then devices_columns+=(TEMP); fi
+  devices_columns=(UUID TYPE RSSI AGO)
+  if gw_has_flag --verbose; then devices_columns+=(BATTERY TEMP); fi
   devices_columns+=(TASKS)
   devices_seen_seconds=()
   local -a table=("${(pj:\t:)devices_columns}")
@@ -82,8 +82,10 @@ devices_print() {
     fields=("${(@ps:\t:)line}")
     devices_ago_cell "${fields[1]}" "${fields[5]}"
     row="${fields[1]}"$'\t'"${fields[2]:--}"$'\t'"${fields[3]:--}"$'\t'"$REPLY"
-    row+=$'\t'"$(devices_measurement "${fields[6]:-}" '%.2f V')"
-    if gw_has_flag --verbose; then row+=$'\t'"$(devices_measurement "${fields[7]:-}" '%.1f °C')"; fi
+    if gw_has_flag --verbose; then
+      row+=$'\t'"$(devices_measurement "${fields[6]:-}" '%.2f V')"
+      row+=$'\t'"$(devices_measurement "${fields[7]:-}" '%.1f °C')"
+    fi
     table+=("$row"$'\t'"${fields[8]:--}")
   done
   print -rl -- "${table[@]}" | gw_table devices_style_cell
