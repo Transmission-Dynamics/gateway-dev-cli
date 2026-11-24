@@ -37,7 +37,7 @@ test_health_watch_refreshes_until_stopped() {
 test_health_watch_redraws_in_place_on_a_terminal() {
   given_alias alpha td@alpha.local
   given_gateway_health
-  GW_WATCH_SECONDS=0.2 python3 "$TESTS_DIR/in_terminal.py" 1.5 "$GW_BIN" health alpha --watch
+  GW_WATCH_SECONDS=0.2 python3 "$TESTS_DIR/in_terminal.py" 3 "$GW_BIN" health alpha --watch
   local screen=$(< "$GW_TEST_DIR/terminal")
   (( ${#${(ps:\e[H:)screen}} >= 3 )) || fail 'expected at least two frames drawn from the top'
   assert_contains "$screen" $'Resources  up'

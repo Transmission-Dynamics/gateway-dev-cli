@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 emulate -R zsh
-setopt no_unset pipe_fail
+setopt no_unset pipe_fail no_monitor no_bg_nice
 
 TESTS_DIR=${0:A:h}
 GW_REPO=${TESTS_DIR:h}
@@ -12,19 +12,60 @@ for test_file in "$TESTS_DIR"/*_test.zsh; do
 done
 
 filter=${1:-}
+parallel_jobs=${GW_TEST_JOBS:-$(sysctl -n hw.ncpu 2> /dev/null || print 4)}
+results=$(mktemp -d "${${TMPDIR:-/tmp}%/}/gw-results.XXXXXX")
+trap 'rm -rf "$results"' EXIT
+
+test_names=()
+for test_name in ${(ok)functions[(I)test_*]}; do
+  [[ -z $filter || $test_name == *$filter* ]] && test_names+=("$test_name")
+done
+
 passed=0
 failed_tests=()
-for test_name in ${(ok)functions[(I)test_*]}; do
-  [[ -z $filter || $test_name == *$filter* ]] || continue
-  if output=$(run_test "$test_name" 2>&1); then
-    passed=$(( passed + 1 ))
-    print -r -- "✓ $test_name"
-  else
-    failed_tests+=("$test_name")
-    print -r -- "✗ $test_name"
-    print -r -- "$output" | sed 's/^/    /'
-  fi
+next=1
+launched=0
+
+running_tests() {
+  local -a finished=("$results"/*.status(N))
+  REPLY=$(( launched - ${#finished} ))
+}
+
+report_finished() {
+  local test_name
+  while (( next <= ${#test_names} )); do
+    test_name=${test_names[next]}
+    [[ -f $results/$test_name.status ]] || return 0
+    if [[ $(< "$results/$test_name.status") == 0 ]]; then
+      passed=$(( passed + 1 ))
+      print -r -- "✓ $test_name"
+    else
+      failed_tests+=("$test_name")
+      print -r -- "✗ $test_name"
+      sed 's/^/    /' "$results/$test_name.output"
+    fi
+    next=$(( next + 1 ))
+  done
+}
+
+for test_name in "${test_names[@]}"; do
+  while running_tests && (( REPLY >= parallel_jobs )); do
+    report_finished
+    sleep 0.05
+  done
+  launched=$(( launched + 1 ))
+  {
+    exit_code=0
+    run_test "$test_name" > "$results/$test_name.output" 2>&1 || exit_code=$?
+    print -r -- "$exit_code" > "$results/$test_name.status"
+  } &
 done
+while running_tests && (( REPLY > 0 )); do
+  report_finished
+  sleep 0.05
+done
+wait
+report_finished
 
 print
 if (( ${#failed_tests} > 0 )); then

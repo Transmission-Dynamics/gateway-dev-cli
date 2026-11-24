@@ -50,7 +50,7 @@ def interrupt(command):
                 if time.monotonic() >= deadline:
                     raise RuntimeError("Deploy did not exit after Ctrl+C")
 
-            deadline = time.monotonic() + 2
+            deadline = time.monotonic() + 10
             while read_terminal(master, stderr):
                 if time.monotonic() >= deadline:
                     raise RuntimeError("Deploy left its terminal open after Ctrl+C")
