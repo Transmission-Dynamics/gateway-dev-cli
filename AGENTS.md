@@ -8,6 +8,8 @@
 ./bin/gw --help
 ```
 
+Tests run in parallel, one per CPU; set `GW_TEST_JOBS=1` to run them one by one.
+
 Every change comes with a test, and the suite must pass.
 
 ## Layout
@@ -16,12 +18,15 @@ Every change comes with a test, and the suite must pass.
 bin/gw                   entry point: loads lib/ and calls gw_main
 lib/ui.zsh               palettes (C stdout, E stderr), icons (I), messages, gw_table
 lib/runtime.zsh          exit hooks, Ctrl+C, unexpected-failure trap
-lib/cli.zsh              command registry, help, argument parsing, "did you mean"
+lib/cli.zsh              command registry, gw_main, argument parsing
+lib/help.zsh             gw --help and gw <command> --help
+lib/suggest.zsh          "did you mean" (edit distance, prefixes)
+lib/format.zsh           duration, size and path labels; gw_parse_duration
 lib/completion.zsh       gw __complete, behind tab completion
 lib/config.zsh           line-based files in ~/.config/gw
 lib/gateway.zsh          aliases, gateway argument, session fallback
 lib/activity.zsh         spinner, steps, gw_remote, gw_watch
-lib/status.zsh           status table, states, duration and size labels
+lib/status.zsh           status table and states
 lib/targets.zsh          target files and their backups during a deploy
 lib/commands/<name>.zsh  one file per command, loaded automatically
 lib/remote/<name>.sh     POSIX sh scripts run on the gateway
@@ -97,7 +102,8 @@ Real deploys and restarts aren't covered, so try those on a gateway before you m
 ## Releasing
 
 Push a tag like `v0.2.0` on `main`. The Release workflow runs the tests, packs the repo with
-`scripts/package.sh` (adds `VERSION`, drops what `.gitattributes` marks `export-ignore`) and publishes a GitHub
-release. It then sets the **Latest release:** line in README.md on `main`
-(`scripts/set-readme-release.sh`). `get.sh` and `gw update` install the newest release into `~/.local/share/gw/<version>`. To work on gw,
-clone it and run `./install.sh` instead.
+`scripts/package.sh` (adds `VERSION`, drops what `.gitattributes` marks `export-ignore`), publishes a GitHub
+release, and sets the **Latest release:** line in README.md on `main` (`scripts/set-readme-release.sh`).
+
+`get.sh` and `gw update` install a release into `~/.local/share/gw/<version>`. To work on gw, clone it and run
+`./install.sh` instead.
