@@ -40,7 +40,7 @@ doctor_check_install() {
   if [[ -z $command_path ]]; then
     doctor_problem 'gw is not on your PATH' 'Fix:' "$(gw_shorten_path "$GW_ROOT")/install.sh"
   elif [[ ${command_path:A} != ${GW_ROOT:A}/bin/gw ]]; then
-    doctor_problem "gw on your PATH is $(gw_shorten_path "${command_path:A}"), not this clone" 'Fix:' "$(gw_shorten_path "$GW_ROOT")/install.sh"
+    doctor_problem "gw on your PATH is $(gw_shorten_path "${command_path:A}"), not this copy of gw" 'Fix:' "$(gw_shorten_path "$GW_ROOT")/install.sh"
   else
     gw_ok "gw on your PATH runs $(gw_shorten_path "$GW_ROOT")"
   fi

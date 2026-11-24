@@ -4,7 +4,7 @@ GW_HELP_GROUPS=(
   'Session' 'session'
   'Inspect' 'status health devices submodules logs'
   'Operate' 'deploy restart ssh'
-  'Set up' 'alias link target use doctor'
+  'Set up' 'alias link target use doctor update'
 )
 
 typeset -ga GW_COMMANDS=()
@@ -86,7 +86,11 @@ gw_require_command() {
 
 gw_version() {
   local version
-  version=$(git -C "$GW_ROOT" describe --tags --always --dirty 2> /dev/null) || version=unknown
+  if [[ -f $GW_ROOT/VERSION ]]; then
+    version=$(< "$GW_ROOT/VERSION")
+  else
+    version=$(git -C "$GW_ROOT" describe --tags --always --dirty 2> /dev/null) || version=unknown
+  fi
   print -r -- "gw $version"
 }
 

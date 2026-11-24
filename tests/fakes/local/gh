@@ -1,0 +1,12 @@
+#!/bin/sh
+echo "gh $*" >> "$GW_TEST_DIR/gh.log"
+case $1 in
+  auth) [ -z "${GW_TEST_GH_SIGNED_OUT:-}" ] ;;
+  release)
+    while [ $# -gt 0 ]; do
+      [ "$1" = --dir ] && dir=$2
+      shift
+    done
+    cp "$GW_TEST_DIR"/release/*.tar.gz "$dir/"
+    ;;
+esac

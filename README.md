@@ -3,7 +3,7 @@
 `gw` deploys, inspects and restarts services on TD gateways from your Mac.
 
 ```zsh
-gw session manta      # this terminal now talks to manta
+gw session alpha      # this terminal now talks to alpha
 gw status             # what is deployed and whether it runs
 gw deploy rest-api    # build your local td1023-rest and deploy it
 gw session off
@@ -13,19 +13,26 @@ Run `gw --help` for all commands and `gw <command> --help` for options and examp
 
 ## 📦 Install
 
-You need zsh, `git`, `npm` and ssh keys for the gateways.
+You need zsh, `git`, `npm`, ssh keys for the gateways, and access to this repo. Sign in once with `gh auth login`, then:
 
 ```zsh
-git clone https://github.com/td-abaimyrza/gateway-dev-cli
-~/<path-to>/gateway-dev-cli/install.sh
+gh api repos/Transmission-Dynamics/gateway-dev-cli/contents/get.sh -H 'Accept: application/vnd.github.raw' | zsh
 ```
 
-Open a new terminal and run `gw doctor` to check the setup. To update, `git pull`. To remove, `./uninstall.sh` (your config is kept).
+No `gh`? Use a GitHub token that can read the repo:
+
+```zsh
+curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github.raw' \
+  https://api.github.com/repos/Transmission-Dynamics/gateway-dev-cli/contents/get.sh | zsh
+```
+
+Open a new terminal and run `gw doctor` to check the setup. Update with `gw update`. Remove with
+`~/.local/share/gw/*/uninstall.sh` (your config is kept).
 
 ## 🔧 Set up once
 
 ```zsh
-gw alias td@manta-ottawa.local manta
+gw alias td@alpha.local alpha
 gw link rest-api ~/<path-to>/td1023-rest
 gw target add rest-api ~/<path-to>/td1023-rest/scripts/target
 ```
@@ -48,8 +55,9 @@ The gateway is an alias or an ssh address. Inside a session you can leave it out
 | `gw alias`, `gw link`, `gw target`  | Manage gateways, repos and target files                                    |
 | `gw use [gateway]`                  | Point target files at a gateway for good                                   |
 | `gw doctor`                         | Check your setup                                                           |
+| `gw update [version]`               | Update gw to the latest release, or to the version given                   |
 
-💡 Try `gw deploy td@manta-ottawa.local rest-api --dry-run` or `gw deploy manta rest-api` (if you have an alias) to see the plan without changing anything.
+💡 Add `--dry-run` to `gw deploy` to see the plan without changing anything.
 
 ## 🗂️ Config
 

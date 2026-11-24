@@ -1,5 +1,5 @@
 repo_zsh_files() {
-  print -l "$GW_REPO"/bin/gw "$GW_REPO"/*.sh "$GW_REPO"/lib/**/*.zsh "$GW_REPO"/shell/*.zsh "$GW_REPO"/tests/run "$GW_REPO"/tests/*.zsh
+  print -l "$GW_REPO"/bin/gw "$GW_REPO"/*.sh "$GW_REPO"/scripts/*.sh "$GW_REPO"/lib/**/*.zsh "$GW_REPO"/shell/*.zsh "$GW_REPO"/tests/run "$GW_REPO"/tests/*.zsh
 }
 
 repo_sh_files() {

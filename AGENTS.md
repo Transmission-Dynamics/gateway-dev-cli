@@ -93,3 +93,10 @@ sandbox, `ssh` runs remote scripts locally, and any address containing `unreacha
 (`given_*`), `run_gw` (fills `gw_stdout`, `gw_stderr`, `gw_exit`) and `assert_*` are in
 `tests/helpers.zsh`. A remote tool a script needs goes in `tests/fakes/remote`, fed by a `given_*` fixture.
 Real deploys and restarts aren't covered, so try those on a gateway before you merge.
+
+## Releasing
+
+Push a tag like `v0.2.0` on `main`. The Release workflow runs the tests, packs the repo with
+`scripts/package.sh` (adds `VERSION`, drops what `.gitattributes` marks `export-ignore`) and publishes a GitHub
+release. `get.sh` and `gw update` install the newest release into `~/.local/share/gw/<version>`. To work on gw,
+clone it and run `./install.sh` instead.
